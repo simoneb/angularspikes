@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html ng-app="spikeApp">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="../angular.min.js"></script>
+    <script>
+        function Service(b) {
+            this.greeting = "service" + b.greeting;
+        }
+
+        angular.module('spikeApp', [])
+                .service('a', ['c', Service])
+                .factory('b', function () {
+                    return {
+                        greeting: 'factory'
+                    };
+                })
+                .provider('c', function () {
+                    return {
+                        $get: function () {
+                            return {
+                                greeting: 'provider'
+                            }
+                        }
+                    }
+                })
+                .value('d', { greeting: 'value' })
+                .filter('truthy', function(){
+                    return function(items, count){
+                        return items.filter(function(item){
+                           return !!item;
+                        }).slice(0, count || items.length);
+                    }
+                })
+                .directive('pollo', function($timeout){
+                    return function(scope, element, attrs) {
+                        $timeout(function(){
+                            scope.$apply(attrs['pollo']);
+                        });
+                    }
+                })
+                .controller('spikeCtrl', ['$scope', 'a', 'b', 'c', 'd', function ($scope, a, b, c, d) {
+                    $scope.greeting = a.greeting;
+                    $scope.items = [1,2,3,0,4,null,5,undefined,true,false]
+                }]);
+    </script>
+</head>
+<body ng-controller="spikeCtrl">
+{{greeting}}
+<span pollo="item = 'pollo'">Ciao {{item}}</span>
+<ol>
+    <li ng-repeat="item in items | truthy" pollo="item = 'pollo'">{{item}}</li>
+</ol>
+</body>
+</html>
